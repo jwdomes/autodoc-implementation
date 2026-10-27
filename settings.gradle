@@ -1,0 +1,4 @@
+rootProject.name = 'flowcap-implementation'
+
+include 'partner-clients'
+include 'main-app', 'partner-a', 'partner-b', 'partner-c'

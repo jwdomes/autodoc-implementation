@@ -1,0 +1,184 @@
+{
+  "description": "Partner B returns 500 after A succeeds: request fails with 502 and C is never called",
+  "method": "POST",
+  "path": "/search",
+  "request": {
+    "header": {
+      "requestId": "partner-b-error",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [
+      {
+        "documentType": "PASSPORT",
+        "documentNumber": "FA0000006"
+      },
+      {
+        "documentType": "DRIVER_LICENSE",
+        "documentNumber": "F00000006"
+      }
+    ],
+    "person": {
+      "first": "Kai",
+      "last": "Ford",
+      "ssn": "900000006",
+      "pNumber": "PN900006",
+      "birthDate": "1970-07-07"
+    }
+  },
+  "expectedStatus": 502,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Ford"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "The new ID provider is switched off, which is the default"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personId",
+                "equalTo": "900000006"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.documentNumber",
+                "equalTo": "FA0000006"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner A needs an SSN and a valid passport"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.pNumber",
+                "equalTo": "PN900006"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner B is eligible, and its call fails with a 500"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches"
+        },
+        "count": 0,
+        "why": "The request stops at Partner B's failure, so Partner C is never reached"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.status",
+            "equalTo": "502"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.detail",
+            "equalTo": "Partner call failed"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/legacy-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Ford"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "LEGACY-FORD"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-a/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personId",
+              "equalTo": "900000006"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Kai",
+              "lastName": "Ford",
+              "birthDate": "1970-07-07",
+              "matchProbability": 1.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-b/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.pNumber",
+              "equalTo": "PN900006"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 500
+      }
+    }
+  ]
+}

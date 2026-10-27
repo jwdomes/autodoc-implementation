@@ -1,0 +1,14 @@
+plugins {
+    id 'org.springframework.boot' version '4.0.8' apply false
+}
+
+subprojects {
+    repositories {
+        mavenLocal()     // com.example:flowcap, from publishToMavenLocal in the flowcap repo
+        mavenCentral()
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+}

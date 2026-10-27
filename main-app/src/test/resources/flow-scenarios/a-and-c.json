@@ -1,0 +1,221 @@
+{
+  "description": "SSN and valid passport but no PNumber: A and C are called, B is skipped",
+  "method": "POST",
+  "path": "/search",
+  "request": {
+    "header": {
+      "requestId": "a-and-c",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [
+      {
+        "documentType": "PASSPORT",
+        "documentNumber": "FA0000002"
+      },
+      {
+        "documentType": "DRIVER_LICENSE",
+        "documentNumber": "F00000002"
+      }
+    ],
+    "person": {
+      "first": "Gil",
+      "last": "Baker",
+      "ssn": "900000002",
+      "birthDate": "1975-05-05"
+    }
+  },
+  "expectedStatus": 200,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Baker"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "The new ID provider is switched off, which is the default"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/new-id-provider/lookup"
+        },
+        "count": 0
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personId",
+                "equalTo": "900000002"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.documentNumber",
+                "equalTo": "FA0000002"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner A needs an SSN and a valid passport"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches"
+        },
+        "count": 0,
+        "why": "Partner B needs a PNumber, and this person has none"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personIdentifier",
+                "equalTo": "900000002"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.firstName",
+                "absent": true
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner C needs an SSN"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.personId",
+            "equalTo": "LEGACY-BAKER"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results.length()",
+            "equalTo": "2"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[0].partner",
+            "equalTo": "PARTNER_A"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[1].partner",
+            "equalTo": "PARTNER_C"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/legacy-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Baker"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "LEGACY-BAKER"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-a/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personId",
+              "equalTo": "900000002"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Gil",
+              "lastName": "Baker",
+              "birthDate": "1975-05-05",
+              "matchProbability": 1.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-c/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personIdentifier",
+              "equalTo": "900000002"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Gil",
+              "lastName": "Baker",
+              "birthDate": "1975-05-05",
+              "matchProbability": 1.0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

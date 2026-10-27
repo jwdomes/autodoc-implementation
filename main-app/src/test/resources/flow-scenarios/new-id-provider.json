@@ -1,0 +1,114 @@
+{
+  "description": "New ID provider switched on: the person id comes from the new provider; no identifiers, so no partner is called",
+  "method": "POST",
+  "path": "/search",
+  "properties": {
+    "id-provider.use-new": "true"
+  },
+  "request": {
+    "header": {
+      "requestId": "new-id-provider",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [],
+    "person": {
+      "first": "Mo",
+      "last": "Grant",
+      "birthDate": "1988-08-08"
+    }
+  },
+  "expectedStatus": 200,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/new-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Grant"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "id-provider.use-new is switched on"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup"
+        },
+        "count": 0
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches"
+        },
+        "count": 0,
+        "why": "Partner A needs an SSN"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches"
+        },
+        "count": 0,
+        "why": "Partner B needs a PNumber"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches"
+        },
+        "count": 0,
+        "why": "Partner C needs an SSN"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.personId",
+            "equalTo": "NEW-GRANT"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results.length()",
+            "equalTo": "0"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/new-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Grant"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "NEW-GRANT"
+        }
+      }
+    }
+  ]
+}

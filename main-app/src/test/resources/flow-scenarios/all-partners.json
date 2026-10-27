@@ -1,0 +1,290 @@
+{
+  "description": "SSN, PNumber, valid passport and license: A, B and C are all called",
+  "method": "POST",
+  "path": "/search",
+  "request": {
+    "header": {
+      "requestId": "all-partners",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [
+      {
+        "documentType": "PASSPORT",
+        "documentNumber": "FA0000001"
+      },
+      {
+        "documentType": "DRIVER_LICENSE",
+        "documentNumber": "F00000001"
+      }
+    ],
+    "person": {
+      "first": "Fiona",
+      "last": "Ames",
+      "ssn": "900000001",
+      "pNumber": "PN900001",
+      "birthDate": "1980-01-01"
+    }
+  },
+  "expectedStatus": 200,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Ames"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "The new ID provider is switched off, which is the default"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/new-id-provider/lookup"
+        },
+        "count": 0
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personId",
+                "equalTo": "900000001"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.documentNumber",
+                "equalTo": "FA0000001"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner A needs an SSN and a valid passport"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.pNumber",
+                "equalTo": "PN900001"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.documentNumber",
+                "equalTo": "F00000001"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.birthDate",
+                "equalTo": "1980-01-01"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner B needs a PNumber and a valid driver license"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personIdentifier",
+                "equalTo": "900000001"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.firstName",
+                "absent": true
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner C needs an SSN"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.personId",
+            "equalTo": "LEGACY-AMES"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results.length()",
+            "equalTo": "3"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[0].partner",
+            "equalTo": "PARTNER_A"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[1].partner",
+            "equalTo": "PARTNER_B"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[2].partner",
+            "equalTo": "PARTNER_C"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[1].matches.length()",
+            "equalTo": "2"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/legacy-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Ames"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "LEGACY-AMES"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-a/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personId",
+              "equalTo": "900000001"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Fiona",
+              "lastName": "Ames",
+              "birthDate": "1980-01-01",
+              "matchProbability": 1.0
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-b/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.pNumber",
+              "equalTo": "PN900001"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Fiona",
+              "lastName": "Ames",
+              "birthDate": "1980-01-01",
+              "matchProbability": 1.0
+            },
+            {
+              "firstName": "Fiona",
+              "lastName": "Amos",
+              "birthDate": "1980-01-01",
+              "matchProbability": 0.7
+            }
+          ]
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-c/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personIdentifier",
+              "equalTo": "900000001"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": [
+            {
+              "firstName": "Fiona",
+              "lastName": "Ames",
+              "birthDate": "1980-01-01",
+              "matchProbability": 1.0
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

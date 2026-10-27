@@ -1,0 +1,166 @@
+{
+  "description": "SSN with a malformed passport: only C is called",
+  "method": "POST",
+  "path": "/search",
+  "request": {
+    "header": {
+      "requestId": "c-only",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [
+      {
+        "documentType": "PASSPORT",
+        "documentNumber": "BAD"
+      }
+    ],
+    "person": {
+      "first": "Ivan",
+      "last": "Diaz",
+      "ssn": "900000004",
+      "birthDate": "1985-03-03"
+    }
+  },
+  "expectedStatus": 200,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Diaz"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "The new ID provider is switched off, which is the default"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/new-id-provider/lookup"
+        },
+        "count": 0
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches"
+        },
+        "count": 0,
+        "why": "Partner A needs a valid passport, and BAD isn't a valid passport number"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches"
+        },
+        "count": 0,
+        "why": "Partner B needs a PNumber, and this person has none"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.personIdentifier",
+                "equalTo": "900000004"
+              }
+            },
+            {
+              "matchesJsonPath": {
+                "expression": "$.firstName",
+                "absent": true
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "Partner C needs an SSN"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.personId",
+            "equalTo": "LEGACY-DIAZ"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results.length()",
+            "equalTo": "1"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[0].partner",
+            "equalTo": "PARTNER_C"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results[0].matches.length()",
+            "equalTo": "0"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/legacy-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Diaz"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "LEGACY-DIAZ"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/partner-c/matches",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.personIdentifier",
+              "equalTo": "900000004"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "matches": []
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "description": "No SSN and no PNumber: no partner is called",
+  "method": "POST",
+  "path": "/search",
+  "request": {
+    "header": {
+      "requestId": "no-partners",
+      "source": "flow-scenario",
+      "timestamp": "2026-10-20T12:00:00Z"
+    },
+    "documents": [],
+    "person": {
+      "first": "Jo",
+      "last": "Ellis",
+      "birthDate": "2000-01-01"
+    }
+  },
+  "expectedStatus": 200,
+  "expect": {
+    "calls": [
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/legacy-id-provider/lookup",
+          "bodyPatterns": [
+            {
+              "matchesJsonPath": {
+                "expression": "$.lastName",
+                "equalTo": "Ellis"
+              }
+            }
+          ]
+        },
+        "count": 1,
+        "why": "The new ID provider is switched off, which is the default"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/new-id-provider/lookup"
+        },
+        "count": 0
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-a/matches"
+        },
+        "count": 0,
+        "why": "Partner A needs an SSN"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-b/matches"
+        },
+        "count": 0,
+        "why": "Partner B needs a PNumber"
+      },
+      {
+        "request": {
+          "method": "POST",
+          "urlPath": "/partner-c/matches"
+        },
+        "count": 0,
+        "why": "Partner C needs an SSN"
+      }
+    ],
+    "response": {
+      "bodyPatterns": [
+        {
+          "matchesJsonPath": {
+            "expression": "$.personId",
+            "equalTo": "LEGACY-ELLIS"
+          }
+        },
+        {
+          "matchesJsonPath": {
+            "expression": "$.results.length()",
+            "equalTo": "0"
+          }
+        }
+      ]
+    }
+  },
+  "stubs": [
+    {
+      "request": {
+        "method": "POST",
+        "urlPath": "/legacy-id-provider/lookup",
+        "bodyPatterns": [
+          {
+            "matchesJsonPath": {
+              "expression": "$.lastName",
+              "equalTo": "Ellis"
+            }
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "jsonBody": {
+          "personId": "LEGACY-ELLIS"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+flowchart TD
+    subgraph LEGACY_ID_PROVIDER["Legacy ID Provider"]
+        call_legacy_id_provider["Call Legacy ID Provider"]
+    end
+    subgraph NEW_ID_PROVIDER["New ID Provider"]
+        call_new_id_provider["Call New ID Provider"]
+    end
+    subgraph PARTNER_A["Partner A"]
+        call_partner_a["Call Partner A"]
+    end
+    subgraph PARTNER_B["Partner B"]
+        call_partner_b["Call Partner B"]
+    end
+    subgraph PARTNER_C["Partner C"]
+        call_partner_c["Call Partner C"]
+    end
+    subgraph ROUTER["Router"]
+        determine_downstream_partners["Determine downstream partners"]
+        map_partner_failure_to_502["Map partner failure to 502"]
+        receive_search_request["Receive search request"]
+    end
+    determine_downstream_partners --> call_legacy_id_provider
+    determine_downstream_partners --> call_new_id_provider
+    determine_downstream_partners --> call_partner_a
+    determine_downstream_partners --> call_partner_b
+    determine_downstream_partners --> call_partner_c
+    receive_search_request --> determine_downstream_partners
+    receive_search_request -.->|"RestClientException"| map_partner_failure_to_502

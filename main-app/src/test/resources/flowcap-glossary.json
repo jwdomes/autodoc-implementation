@@ -1,0 +1,20 @@
+{
+  "endpoints": {
+    "POST /partner-a/matches": "Partner A match search",
+    "POST /partner-b/matches": "Partner B match search",
+    "POST /partner-c/matches": "Partner C match search",
+    "POST /legacy-id-provider/lookup": "Legacy ID provider lookup",
+    "POST /new-id-provider/lookup": "New ID provider lookup"
+  },
+  "fields": {
+    "$.personId": "Person ID",
+    "$.pNumber": "PNumber",
+    "$.personIdentifier": "Person identifier (SSN)",
+    "$.documentNumber": "Document number",
+    "$.results": "Results",
+    "$.results[*].partner": "Partner",
+    "$.results[*].matches": "Matches",
+    "$.detail": "Error detail",
+    "$.status": "Status"
+  }
+}

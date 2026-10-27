@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot'
+    id 'io.gatling.gradle' version '3.16.0'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'com.example:flowcap:0.1.0'
+    implementation project(':partner-clients')
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
+    testImplementation testFixtures('com.example:flowcap:0.1.0')
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    // -Pflowcap.docs.formats=markdown,mermaid and -Pflowcap.docs.verify=true reach flowcap as system properties
+    ['flowcap.docs.formats', 'flowcap.docs.verify'].each { key ->
+        def value = providers.gradleProperty(key)
+        if (value.present) {
+            systemProperty key, value.get()
+        }
+    }
+    // The docs are inputs when they're verified, and outputs when the tests write them.
+    if (providers.gradleProperty('flowcap.docs.verify').getOrElse('false') == 'true') {
+        inputs.dir('docs').optional()
+    } else {
+        outputs.dir('docs')
+    }
+}
