@@ -1,6 +1,6 @@
 package com.example.router.idprovider;
 
-import com.example.flowcap.FlowStep;
+import com.example.autodoc.FlowStep;
 import com.example.partnerclients.IdLookupRequest;
 import com.example.partnerclients.LegacyIdProviderClient;
 import com.example.partnerclients.NewIdProviderClient;

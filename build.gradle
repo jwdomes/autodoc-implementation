@@ -4,7 +4,7 @@ plugins {
 
 subprojects {
     repositories {
-        mavenLocal()     // com.example:flowcap, from publishToMavenLocal in the flowcap repo
+        mavenLocal()     // com.example:autodoc, from publishToMavenLocal in the autodoc repo
         mavenCentral()
     }
 

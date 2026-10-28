@@ -1,6 +1,6 @@
 package com.example.router.partner;
 
-import com.example.flowcap.FlowStep;
+import com.example.autodoc.FlowStep;
 import com.example.partnerclients.PartnerAClient;
 import com.example.partnerclients.PartnerARequest;
 import com.example.router.Participants;

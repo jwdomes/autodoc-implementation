@@ -1,6 +1,6 @@
 package com.example.router;
 
-import com.example.flowcap.FlowStep;
+import com.example.autodoc.FlowStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

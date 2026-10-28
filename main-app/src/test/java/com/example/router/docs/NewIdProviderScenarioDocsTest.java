@@ -1,6 +1,6 @@
 package com.example.router.docs;
 
-import com.example.flowcap.test.Scenario;
+import com.example.autodoc.test.Scenario;
 import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -10,11 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 /** Scenarios for id-provider.use-new=true. */
 @SpringBootTest(properties = {
-        "flowcap.observations.enabled=true", "id-provider.use-new=true"})
+        "autodoc.observations.enabled=true", "id-provider.use-new=true"})
 class NewIdProviderScenarioDocsTest extends ScenarioDocsTestSupport {
 
     static Stream<String> scenarios() throws IOException {
-        return Scenario.names(RouterFlowcap.SETTINGS.scenariosDir(), Map.of("id-provider.use-new", "true"));
+        return Scenario.names(RouterAutodoc.SETTINGS.scenariosDir(), Map.of("id-provider.use-new", "true"));
     }
 
     @ParameterizedTest(name = "{0}")

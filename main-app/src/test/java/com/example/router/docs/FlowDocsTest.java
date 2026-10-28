@@ -1,12 +1,12 @@
 package com.example.router.docs;
 
-import com.example.flowcap.test.StaticFlowcap;
+import com.example.autodoc.test.StaticAutodoc;
 import org.junit.jupiter.api.Test;
 
 class FlowDocsTest {
 
     @Test
     void flowDocsAreCurrent() throws Exception {
-        StaticFlowcap.verify(RouterFlowcap.SETTINGS);
+        StaticAutodoc.verify(RouterAutodoc.SETTINGS);
     }
 }

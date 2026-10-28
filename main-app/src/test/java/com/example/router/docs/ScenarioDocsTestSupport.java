@@ -2,9 +2,9 @@ package com.example.router.docs;
 
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 
-import com.example.flowcap.test.FlowRecorder;
-import com.example.flowcap.test.FlowRecorderConfiguration;
-import com.example.flowcap.test.ScenarioRunner;
+import com.example.autodoc.test.FlowRecorder;
+import com.example.autodoc.test.FlowRecorderConfiguration;
+import com.example.autodoc.test.ScenarioRunner;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ abstract class ScenarioDocsTestSupport {
             .options(wireMockConfig().dynamicPort().http2PlainDisabled(true))
             .build();
 
-    private static final ScenarioRunner RUNNER = new ScenarioRunner(RouterFlowcap.SETTINGS, downstream);
+    private static final ScenarioRunner RUNNER = new ScenarioRunner(RouterAutodoc.SETTINGS, downstream);
 
     @DynamicPropertySource
     static void downstreamUrls(DynamicPropertyRegistry registry) {

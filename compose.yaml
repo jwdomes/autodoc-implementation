@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:17
-    container_name: flowcap-implementation-pg
+    container_name: autodoc-implementation-pg
     environment:
       POSTGRES_USER: automockit
       POSTGRES_PASSWORD: automockit

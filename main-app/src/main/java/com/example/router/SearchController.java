@@ -1,6 +1,6 @@
 package com.example.router;
 
-import com.example.flowcap.FlowStep;
+import com.example.autodoc.FlowStep;
 import com.example.router.dto.RequestDto;
 import com.example.router.dto.ResponseDto;
 import jakarta.validation.Valid;

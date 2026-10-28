@@ -2,7 +2,7 @@ package com.example.router.docs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.example.flowcap.test.Scenario;
+import com.example.autodoc.test.Scenario;
 import com.example.router.partner.PartnerAService;
 import java.io.IOException;
 import java.util.Map;
@@ -15,14 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /** Scenarios for the default configuration. */
-@SpringBootTest(properties = {"flowcap.observations.enabled=true"})
+@SpringBootTest(properties = {"autodoc.observations.enabled=true"})
 class FlowScenarioDocsTest extends ScenarioDocsTestSupport {
 
     @Autowired
     PartnerAService partnerAService;
 
     static Stream<String> scenarios() throws IOException {
-        return Scenario.names(RouterFlowcap.SETTINGS.scenariosDir(), Map.of());
+        return Scenario.names(RouterAutodoc.SETTINGS.scenariosDir(), Map.of());
     }
 
     @ParameterizedTest(name = "{0}")

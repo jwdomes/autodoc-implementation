@@ -1,12 +1,12 @@
-# flowcap-implementation
+# autodoc-implementation
 
-The reference app for [flowcap](../flowcap), the flow-docs library. It's a Spring Boot router
+The reference app for [autodoc](../autodoc), the flow-docs library. It's a Spring Boot router
 (`main-app`) that calls up to three partner services (`partner-a/b/c`), each with its own seeded
 Postgres database. It also has a standalone WireMock container and a Bruno collection for calling the
 mocks.
 
-main-app uses flowcap as a third-party jar, `com.example:flowcap:0.1.0`, read from `~/.m2`. Run
-`./gradlew publishToMavenLocal` in `../flowcap` first, and again after any flowcap change.
+main-app uses autodoc as a third-party jar, `com.example:autodoc:0.1.0`, read from `~/.m2`. Run
+`./gradlew publishToMavenLocal` in `../autodoc` first, and again after any autodoc change.
 
 ## Layout
 
@@ -59,7 +59,7 @@ to call it, and `PartnerXService.call` makes the call through the `PartnerXClien
     partners own their APIs.
   - main-app only sees the interfaces and converts `PartnerMatch` into its own `PersonMatch`.
   - `PartnerClientsAutoConfiguration` registers one client per partner at `partners.x.base-url`.
-  - The module has no flowcap dependency.
+  - The module has no autodoc dependency.
 
 ## Running
 
@@ -113,15 +113,15 @@ Rebuild, start the container, and curl each affected endpoint (and `/__admin/map
 loaded count) before calling a change done. The Bruno CLI (`bru`) is not installed; the desktop
 app is.
 
-## Flow docs (flowcap)
+## Flow docs (autodoc)
 
-The full guide is flowcap's README. Here's how main-app uses it:
+The full guide is autodoc's README. Here's how main-app uses it:
 
 - **Annotations.** `@FlowStep` only, on the controller, `Router.route`, `IdProviderService`'s two
   lookups, `PartnerXService.call`, and `SearchExceptionHandler`.
   - Participants are constants in `Participants`, and step actions are constants in `Steps`.
   - Functional code is never changed for the docs.
-- **On/off.** `flowcap.observations.enabled=true` turns recording on. Unset, flowcap registers
+- **On/off.** `autodoc.observations.enabled=true` turns recording on. Unset, autodoc registers
   nothing, and `FlowObservationsOffTest` checks this.
 - **Scenarios.** `main-app/src/test/resources/flow-scenarios/*.json` hold `description`, `method`,
   `path`, optional `properties`, `request`, `expectedStatus`, `expect` and `stubs`.
@@ -130,7 +130,7 @@ The full guide is flowcap's README. Here's how main-app uses it:
     response.
   - **Partner decisions live in the expectations.** Each scenario states which partners and ID
     provider are called or not, with a `why` taken from the partner rules above.
-  - **Labels** for endpoints and fields are in `main-app/src/test/resources/flowcap-glossary.json`.
+  - **Labels** for endpoints and fields are in `main-app/src/test/resources/autodoc-glossary.json`.
   - **One test class per property set.** `FlowScenarioDocsTest` runs the defaults, and
     `NewIdProviderScenarioDocsTest` runs `id-provider.use-new=true`. Shared wiring is in
     `ScenarioDocsTestSupport`.
@@ -139,10 +139,10 @@ The full guide is flowcap's README. Here's how main-app uses it:
     `$.lastName`.
   - **Stub responses** need `Content-Type: application/json`. Don't use random delays.
 - **Docs.** `main-app/docs/` is written by every test run and committed.
-  - `-Pflowcap.docs.formats=` limits the formats (`markdown`, `markdown-image`, `mermaid`).
-  - `-Pflowcap.docs.verify=true` fails on stale docs instead of writing them.
+  - `-Pautodoc.docs.formats=` limits the formats (`markdown`, `markdown-image`, `mermaid`).
+  - `-Pautodoc.docs.verify=true` fails on stale docs instead of writing them.
   - `markdown-image/` is the Confluence set, with diagrams as SVG images.
-- **Rules.** `FlowcapRulesTest` includes `FlowcapRules`, plus
+- **Rules.** `AutodocRulesTest` includes `AutodocRules`, plus
   `downstreamCallsAreSteps("com.example.partnerclients..")`.
 - **WireMock and HTTP/2.** Spring's RestClient uses the JDK HttpClient, which tries an h2c upgrade
   that WireMock's Jetty resets. It's turned off on the WireMock side: `http2PlainDisabled(true)` in
@@ -152,9 +152,9 @@ Gatling load test (`main-app/src/gatling/java/.../FlowScenariosSimulation.java`)
 
 ```bash
 docker run -d --rm --name wiremock -p 8080:8080 wiremock-local
-java -jar main-app/build/libs/main-app.jar --spring.profiles.active=wiremock --flowcap.observations.enabled=true
+java -jar main-app/build/libs/main-app.jar --spring.profiles.active=wiremock --autodoc.observations.enabled=true
 ./gradlew :main-app:gatlingRun        # env: APP_URL, WIREMOCK_URL, PARTNER_DELAY_MS, PEAK_USERS_PER_SEC, RAMP_SECONDS, GATLING_PROPERTIES
-curl 'localhost:8090/actuator/metrics/flowcap.step?tag=flowcap.participant:PARTNER_A'
+curl 'localhost:8090/actuator/metrics/autodoc.step?tag=autodoc.participant:PARTNER_A'
 ```
 
 `before()` resets WireMock and loads every scenario's stubs. `GATLING_PROPERTIES`, for example

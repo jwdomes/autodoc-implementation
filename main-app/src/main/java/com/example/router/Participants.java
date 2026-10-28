@@ -1,6 +1,6 @@
 package com.example.router;
 
-import com.example.flowcap.FlowParticipant;
+import com.example.autodoc.FlowParticipant;
 
 /** Participant ids for @FlowStep; the labels appear in the flow docs. */
 public final class Participants {
