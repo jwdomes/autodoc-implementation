@@ -123,7 +123,7 @@ The full guide is autodoc's README. Here's how main-app uses it:
   - Functional code is never changed for the docs.
 - **On/off.** `autodoc.observations.enabled=true` turns recording on. Unset, autodoc registers
   nothing, and `FlowObservationsOffTest` checks this.
-- **Scenarios.** `main-app/src/test/resources/flow-scenarios/*.json` hold `description`, `method`,
+- **Scenarios.** `main-app/src/test/resources/scenarios/*.json` (the default for `autodoc.scenarios.dir`) hold `description`, `method`,
   `path`, optional `properties`, `request`, `expectedStatus`, `expect` and `stubs`.
   - **`expect`** uses WireMock syntax. Each `calls` entry is a WireMock request pattern plus `count`
     (exact; omitted means at least once) and `why`. `response.bodyPatterns` checks the router's

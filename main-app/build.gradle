@@ -26,8 +26,8 @@ dependencies {
 }
 
 tasks.named('test') {
-    // -Pautodoc.docs.formats=markdown,mermaid and -Pautodoc.docs.verify=true reach autodoc as system properties
-    ['autodoc.docs.formats', 'autodoc.docs.verify'].each { key ->
+    // autodoc.* settings from gradle.properties or -P reach autodoc as system properties
+    ['autodoc.docs.formats', 'autodoc.docs.verify', 'autodoc.scenarios.dir'].each { key ->
         def value = providers.gradleProperty(key)
         if (value.present) {
             systemProperty key, value.get()
@@ -38,5 +38,12 @@ tasks.named('test') {
         inputs.dir('docs').optional()
     } else {
         outputs.dir('docs')
+    }
+}
+
+tasks.named('gatlingRun') {
+    def scenariosDir = providers.gradleProperty('autodoc.scenarios.dir')
+    if (scenariosDir.present) {
+        systemProperties = (systemProperties ?: [:]) + ['autodoc.scenarios.dir': scenariosDir.get()]
     }
 }
